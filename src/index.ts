@@ -1,9 +1,16 @@
 import { Agent } from "./agents/Agent.js";
 
+async function main() {
+  const researchAgent = new Agent(
+    "Research Agent",
+    "You research technical topics and provide accurate, useful explanations."
+  );
 
-const researchAgent = new Agent(
-  "Research Agent",
-  "Researches information and provides useful findings."
-);
+  const result = await researchAgent.run(
+    "Explain what a REST API is and why developers use it."
+  );
 
-researchAgent.describe();
+  console.log(result);
+}
+
+main();
