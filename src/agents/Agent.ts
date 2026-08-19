@@ -11,7 +11,28 @@ export class Agent {
   async run(task: string): Promise<string> {
     const messages = [
       {
+        role: 'system',
+
+        content: `
+    
+                You are ${this.name}.
+                
+                Your role:
+                
+                ${this.role}
+                
+                Follow your role when completing tasks.
+                
+                Use available tools when they are useful.
+                
+                Do not invent tool results.
+    
+        `.trim(),
+      },
+
+      {
         role: 'user',
+
         content: task,
       },
     ];
