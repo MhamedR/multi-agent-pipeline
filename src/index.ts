@@ -1,8 +1,8 @@
-import { Agent } from "./agents/Agent.js";
+import {Agent} from './agents/Agent.js';
 
 async function main() {
   const researchAgent = new Agent(
-    "Research Agent",
+    'Research Agent',
     `  
   You are a technical research specialist.
   
@@ -20,13 +20,10 @@ async function main() {
   
   - Organize your findings so another software agent can use them.
   
-  `
-
+  `,
   );
 
-  const result = await researchAgent.run(
-    "Explain what a REST API is and why developers use it."
-  );
+  const result = await researchAgent.run('Explain what a REST API is and why developers use it.');
 
   console.log(result);
 }
