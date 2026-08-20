@@ -1,5 +1,7 @@
 import ollama from 'ollama';
 import {ToolRegistry} from '../tools/ToolRegistry.js';
+import type {Tool} from '../tools/Tool.js';
+import 'dotenv/config';
 
 export class Agent {
   constructor(
@@ -9,6 +11,10 @@ export class Agent {
   ) {}
 
   async run(task: string): Promise<string> {
+    const model = process.env.OLLAMA_MODEL!;
+    if (!model) {
+      throw new Error('OLLAMA_MODEL is not configured."');
+    }
     const messages = [
       {
         role: 'system',
@@ -39,14 +45,14 @@ export class Agent {
 
     while (true) {
       const response = await ollama.chat({
-        model: 'llama3.2:latest',
+        model,
         messages,
-
-        tools: this.toolRegistry.getAll().map((tool) => ({
-          type: 'function',
+        tools: this.toolRegistry.getAll().map((tool: Tool) => ({
+          type: 'function' as const,
           function: {
             name: tool.name,
             description: tool.description,
+            parameters: tool.parameters,
           },
         })),
       });
@@ -65,7 +71,7 @@ export class Agent {
         throw new Error(`Tool "${toolCall.function.name}" was requested but not found.`);
       }
 
-      const result = await tool.execute();
+      const result = await tool.execute(toolCall.function.arguments);
 
       messages.push({
         role: 'tool',
