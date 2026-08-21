@@ -1,46 +1,56 @@
 import type {Tool} from './Tool.js';
-import {DuckDuckGoProvider} from '../search/DuckDuckGoProvider.js';
+import type {SearchProvider} from '../search/SearchProvider.js';
 
-const searchProvider = new DuckDuckGoProvider();
+export function createWebSearchTool(searchProvider: SearchProvider): Tool {
+  return {
+    name: 'web_search',
 
-export const webSearchTool: Tool = {
-  name: 'web_search',
+    description: 'Searches the web and returns relevant results.',
 
-  description: 'Searches the web and returns relevant results.',
+    parameters: {
+      type: 'object',
 
-  parameters: {
-    type: 'object',
-
-    properties: {
-      query: {
-        type: 'string',
-        description: 'The search query.',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'The search query.',
+        },
       },
+
+      required: ['query'],
     },
 
-    required: ['query'],
-  },
+    execute: async (args) => {
+      const query = args.query;
 
-  execute: async (args) => {
-    const query = args.query;
+      if (typeof query !== 'string' || query.trim() === '') {
+        return 'Error: query must be a non-empty string.';
+      }
 
-    if (typeof query !== 'string' || query.trim() === '') {
-      return 'Error: query must be a non-empty string.';
-    }
+      const results = await searchProvider.search(query);
 
-    const results = await searchProvider.search(query);
+      if (results.length === 0) {
+        return `
+SEARCH_STATUS: NO_RESULTS
 
-    if (results.length === 0) {
-      return `No results found for: ${query}`;
-    }
+The search provider returned no results for this query:
 
-    return results
-      .map(
-        (result) =>
-          `Title: ${result.title}
-          URL: ${result.url}
-          Description: ${result.description}`,
-      )
-      .join('\n\n');
-  },
-};
+"${query}"
+
+This does NOT prove that the topic or information does not exist.
+
+Try a different search query.
+        `.trim();
+      }
+
+      return results
+        .map(
+          (result) =>
+            `Title: ${result.title}
+URL: ${result.url}
+Description: ${result.description}`,
+        )
+        .join('\n\n');
+    },
+  };
+}

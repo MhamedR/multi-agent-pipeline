@@ -35,7 +35,7 @@ async function main() {
   console.log('Model requested:', toolCall.function.name);
 
   if (toolCall.function.name === getTimeTool.name) {
-    const result = await getTimeTool.execute();
+    const result = await getTimeTool.execute({});
 
     console.log('Tool result:', result);
 

@@ -59,24 +59,33 @@ export class Agent {
 
       messages.push(response.message);
 
-      const toolCall = response.message.tool_calls?.[0];
+      const toolCalls = response.message.tool_calls ?? [];
 
-      if (!toolCall) {
+      if (toolCalls.length === 0) {
         return response.message.content;
       }
 
-      const tool = this.toolRegistry.get(toolCall.function.name);
+      for (const toolCall of toolCalls) {
+        const tool = this.toolRegistry.get(toolCall.function.name);
 
-      if (!tool) {
-        throw new Error(`Tool "${toolCall.function.name}" was requested but not found.`);
+        if (!tool) {
+          throw new Error(`Tool "${toolCall.function.name}" was requested but not found.`);
+        }
+
+        console.log(
+          `Executing tool: ${toolCall.function.name}`,
+
+          toolCall.function.arguments,
+        );
+
+        const result = await tool.execute(toolCall.function.arguments);
+
+        messages.push({
+          role: 'tool' as const,
+
+          content: result,
+        });
       }
-
-      const result = await tool.execute(toolCall.function.arguments);
-
-      messages.push({
-        role: 'tool',
-        content: result,
-      });
     }
   }
 }

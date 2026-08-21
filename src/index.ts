@@ -1,22 +1,23 @@
 import {ToolRegistry} from './tools/ToolRegistry.js';
-import {webSearchTool} from './tools/webSearch.js';
+import {ResearchAgent} from './agents/ResearchAgent.js';
+import {DuckDuckGoProvider} from './search/DuckDuckGoProvider.js';
+import {createWebSearchTool} from './tools/webSearch.js';
 
 async function main() {
+  const searchProvider = new DuckDuckGoProvider();
+
+  const webSearchTool = createWebSearchTool(searchProvider);
   const registry = new ToolRegistry();
 
   registry.register(webSearchTool);
 
-  const tool = registry.get('web_search');
+  const researchAgent = new ResearchAgent(registry);
 
-  if (!tool) {
-    throw new Error('web_search tool not found');
-  }
+  const report = await researchAgent.research(
+    'current approaches for building AI agents with TypeScript',
+  );
 
-  const result = await tool.execute({
-    query: 'TypeScript',
-  });
-
-  console.log(result);
+  console.log(JSON.stringify(report, null, 2));
 }
 
 main();
