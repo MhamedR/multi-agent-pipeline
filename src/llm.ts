@@ -11,9 +11,7 @@ async function main() {
 
   const response = await ollama.chat({
     model: 'llama3.2:latest',
-
     messages,
-
     tools: [
       {
         type: 'function',
@@ -38,18 +36,12 @@ async function main() {
     const result = await getTimeTool.execute({});
 
     console.log('Tool result:', result);
-
     messages.push(response.message);
-
-    messages.push({
-      role: 'tool',
-      content: result,
-    });
+    messages.push({role: 'tool', content: result});
 
     const finalResponse = await ollama.chat({
       model: 'llama3.2:latest',
       messages,
-
       tools: [
         {
           type: 'function',

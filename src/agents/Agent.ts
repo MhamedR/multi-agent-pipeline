@@ -18,27 +18,18 @@ export class Agent {
     const messages = [
       {
         role: 'system',
-
         content: `
-    
                 You are ${this.name}.
-                
                 Your role:
-                
                 ${this.role}
-                
                 Follow your role when completing tasks.
-                
                 Use available tools when they are useful.
-                
                 Do not invent tool results.
-    
         `.trim(),
       },
 
       {
         role: 'user',
-
         content: task,
       },
     ];
@@ -71,20 +62,10 @@ export class Agent {
         if (!tool) {
           throw new Error(`Tool "${toolCall.function.name}" was requested but not found.`);
         }
-
-        console.log(
-          `Executing tool: ${toolCall.function.name}`,
-
-          toolCall.function.arguments,
-        );
+        console.log(`Executing tool: ${toolCall.function.name}`, toolCall.function.arguments);
 
         const result = await tool.execute(toolCall.function.arguments);
-
-        messages.push({
-          role: 'tool' as const,
-
-          content: result,
-        });
+        messages.push({role: 'tool' as const, content: result});
       }
     }
   }

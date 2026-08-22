@@ -8,12 +8,10 @@ export interface ToolParameter {
 export interface Tool {
   name: string;
   description: string;
-
   parameters: {
     type: 'object';
     properties: Record<string, ToolParameter>;
     required?: string[];
   };
-
   execute: (args: Record<string, unknown>) => Promise<string> | string;
 }

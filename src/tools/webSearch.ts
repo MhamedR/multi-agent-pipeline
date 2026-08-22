@@ -4,12 +4,9 @@ import type {SearchProvider} from '../search/SearchProvider.js';
 export function createWebSearchTool(searchProvider: SearchProvider): Tool {
   return {
     name: 'web_search',
-
     description: 'Searches the web and returns relevant results.',
-
     parameters: {
       type: 'object',
-
       properties: {
         query: {
           type: 'string',
@@ -31,15 +28,11 @@ export function createWebSearchTool(searchProvider: SearchProvider): Tool {
 
       if (results.length === 0) {
         return `
-SEARCH_STATUS: NO_RESULTS
-
-The search provider returned no results for this query:
-
-"${query}"
-
-This does NOT prove that the topic or information does not exist.
-
-Try a different search query.
+                SEARCH_STATUS: NO_RESULTS
+                The search provider returned no results for this query:
+                "${query}"
+                This does NOT prove that the topic or information does not exist.
+                Try a different search query.
         `.trim();
       }
 
@@ -47,8 +40,8 @@ Try a different search query.
         .map(
           (result) =>
             `Title: ${result.title}
-URL: ${result.url}
-Description: ${result.description}`,
+              URL: ${result.url}
+              Description: ${result.description}`,
         )
         .join('\n\n');
     },
