@@ -7,16 +7,17 @@ async function main() {
 
   const result = await codingAgent.code(
     `
-Create a file named coding-agent-test.txt.
-
-The file must contain exactly:
-
-Hello from the Coding Agent.
-
-Use the write_file tool to create the file.
-
-Do not modify any other files.
-  `.trim(),
+    Create a file named coding-agent-test.txt.
+    
+    The file must contain exactly:
+    
+    Hello from the Coding Agent.
+    
+    Then run "cat coding-agent-test.txt" using the run_command tool
+    to verify the file contents.
+    
+    Do not modify any other files.
+    `.trim(),
   );
 
   console.log(result);

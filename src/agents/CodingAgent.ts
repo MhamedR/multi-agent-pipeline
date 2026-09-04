@@ -3,14 +3,16 @@ import {ToolRegistry} from '../tools/ToolRegistry.js';
 import {createReadFileTool} from '../tools/readFile.js';
 import {createListFilesTool} from '../tools/listFiles.js';
 import {createWriteFileTool} from '../tools/writeFile.js';
+import {createRunCommandTool} from '../tools/runCommand.js';
 
 export class CodingAgent {
   private readonly agent: Agent;
 
   constructor(toolRegistry: ToolRegistry) {
     toolRegistry.register(createReadFileTool(process.cwd()));
-    toolRegistry.register(createListFilesTool());
+    toolRegistry.register(createListFilesTool(process.cwd()));
     toolRegistry.register(createWriteFileTool(process.cwd()));
+    toolRegistry.register(createRunCommandTool(process.cwd()));
     this.agent = new Agent(
       'Coding Agent',
       `

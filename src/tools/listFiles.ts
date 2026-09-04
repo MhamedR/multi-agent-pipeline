@@ -1,31 +1,30 @@
 import {readdir} from 'node:fs/promises';
 import type {Tool} from './Tool.js';
+import {resolveWorkspacePath} from './workspace.js';
 
-export function createListFilesTool(): Tool {
+export function createListFilesTool(workspace: string): Tool {
   return {
     name: 'list_files',
-    description: 'Lists files and directories in a project directory.',
+    description: 'Lists files and directories inside the project workspace.',
     parameters: {
       type: 'object',
       properties: {
         path: {
           type: 'string',
-          description: 'The directory to inspect.',
+          description: 'Directory path relative to the workspace.',
         },
       },
-
-      required: ['path'],
     },
 
     execute: async (args) => {
-      const path = args.path;
-
-      if (typeof path !== 'string' || path.trim() === '') {
-        return 'Error: path must be a non-empty string.';
-      }
+      const path = typeof args.path === 'string' ? args.path : '.';
 
       try {
-        const entries = await readdir(path, {withFileTypes: true});
+        const directoryPath = resolveWorkspacePath(workspace, path);
+
+        const entries = await readdir(directoryPath, {
+          withFileTypes: true,
+        });
 
         return entries
           .map((entry) => (entry.isDirectory() ? `${entry.name}/` : entry.name))
