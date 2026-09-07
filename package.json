@@ -5,6 +5,10 @@
   "main": "index.ts",
   "scripts": {
     "dev": "tsx src/index.ts",
+    "research": "tsx src/research-test.ts",
+    "coding": "tsx src/coding-test.ts",
+    "testing": "tsx src/testing-test.ts",
+    "review": "tsx src/review-test.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "format": "prettier --write .",

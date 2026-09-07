@@ -1,21 +1,18 @@
-import {ToolRegistry} from './tools/ToolRegistry.js';
-import {ResearchAgent} from './agents/ResearchAgent.js';
-import {SearXNGProvider} from './search/SearXNGProvider.js';
-import {createWebSearchTool} from './tools/webSearch.js';
+import path from 'node:path';
+import {Orchestrator} from './orchestrator/Orchestrator.js';
+
+const DEFAULT_TASK = `
+Create a small TypeScript package that exports an add(a: number, b: number) function
+and a simple test that verifies add(2, 2) equals 4.
+`.trim();
 
 async function main() {
-  const searchProvider = new SearXNGProvider('http://localhost:8080');
-  const webSearchTool = createWebSearchTool(searchProvider);
-  const registry = new ToolRegistry();
+  const task = process.argv.slice(2).join(' ').trim() || DEFAULT_TASK;
+  const workspace = path.resolve(process.cwd(), 'workspace');
+  const orchestrator = new Orchestrator(workspace);
+  const result = await orchestrator.run(task);
 
-  registry.register(webSearchTool);
-
-  const researchAgent = new ResearchAgent(registry);
-  const report = await researchAgent.research(
-    'current approaches for building AI agents with TypeScript',
-  );
-
-  console.log(JSON.stringify(report, null, 2));
+  console.log(JSON.stringify(result, null, 2));
 }
 
 main();

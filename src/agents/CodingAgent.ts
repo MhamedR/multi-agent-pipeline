@@ -8,25 +8,26 @@ import {createRunCommandTool} from '../tools/runCommand.js';
 export class CodingAgent {
   private readonly agent: Agent;
 
-  constructor(toolRegistry: ToolRegistry) {
-    toolRegistry.register(createReadFileTool(process.cwd()));
-    toolRegistry.register(createListFilesTool(process.cwd()));
-    toolRegistry.register(createWriteFileTool(process.cwd()));
-    toolRegistry.register(createRunCommandTool(process.cwd()));
+  constructor(toolRegistry: ToolRegistry, workspace: string = process.cwd()) {
+    toolRegistry.register(createReadFileTool(workspace));
+    toolRegistry.register(createListFilesTool(workspace));
+    toolRegistry.register(createWriteFileTool(workspace));
+    toolRegistry.register(createRunCommandTool(workspace));
     this.agent = new Agent(
       'Coding Agent',
       `
         You are a software engineer.
 
-        Your job is to solve coding tasks in an existing TypeScript project.
+        Your job is to implement coding tasks in the project workspace.
 
         Rules:
         - Understand the requested task before proposing a solution.
-        - Follow the existing project's architecture and coding style.
+        - If the workspace already has a project, follow its architecture and style.
+        - If the workspace is empty, create a minimal TypeScript project for the task.
         - Prefer small, focused changes.
-        - Do not invent files, APIs, or project structure.
+        - Do not invent files, APIs, or project structure that you did not create.
         - Do not claim that code was changed unless a tool actually changed it.
-        - Do not run tests or commands unless the appropriate tools are available.
+        - Do not run tests unless asked to implement them.
         - Explain what should be changed when you cannot directly modify the project.
       `.trim(),
       toolRegistry,

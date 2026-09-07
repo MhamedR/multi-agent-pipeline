@@ -8,9 +8,8 @@ import type {TestReport} from '../types/TestReport.js';
 export class TestingAgent {
   private readonly agent: Agent;
 
-  constructor() {
+  constructor(workspace: string = process.cwd()) {
     const registry = new ToolRegistry();
-    const workspace = process.cwd();
 
     registry.register(createReadFileTool(workspace));
     registry.register(createListFilesTool(workspace));
