@@ -55,15 +55,6 @@ export class ReviewerAgent {
   }
 
   async review(task: string): Promise<ReviewReport> {
-    const result = await this.agent.run(task);
-
-    try {
-      return JSON.parse(result) as ReviewReport;
-    } catch {
-      console.log('RAW REVIEWER AGENT RESPONSE:');
-      console.log(JSON.stringify(result));
-
-      throw new Error('Reviewer Agent returned invalid JSON.');
-    }
+    return this.agent.runJson<ReviewReport>(task);
   }
 }

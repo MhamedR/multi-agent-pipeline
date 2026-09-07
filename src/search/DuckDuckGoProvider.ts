@@ -9,7 +9,7 @@ export class DuckDuckGoProvider implements SearchProvider {
     url.searchParams.set('no_html', '1');
     url.searchParams.set('skip_disambig', '1');
 
-    const response = await fetch(url);
+    const response = await fetch(url, {signal: AbortSignal.timeout(15_000)});
 
     if (!response.ok) {
       throw new Error(`DuckDuckGo search failed: HTTP ${response.status}`);

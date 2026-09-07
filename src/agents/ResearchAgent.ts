@@ -49,12 +49,6 @@ export class ResearchAgent {
   }
 
   async research(topic: string): Promise<ResearchReport> {
-    const result = await this.agent.run(`Research this topic thoroughly: ${topic}`);
-
-    try {
-      return JSON.parse(result) as ResearchReport;
-    } catch {
-      throw new Error('Research Agent returned invalid JSON:\n' + result);
-    }
+    return this.agent.runJson<ResearchReport>(`Research this topic thoroughly: ${topic}`);
   }
 }

@@ -1,4 +1,5 @@
-import {writeFile} from 'node:fs/promises';
+import {mkdir, writeFile} from 'node:fs/promises';
+import {dirname} from 'node:path';
 import type {Tool} from './Tool.js';
 import {resolveWorkspacePath} from './workspace.js';
 
@@ -36,6 +37,7 @@ export function createWriteFileTool(workspace: string): Tool {
       try {
         const filePath = resolveWorkspacePath(workspace, path);
 
+        await mkdir(dirname(filePath), {recursive: true});
         await writeFile(filePath, content, 'utf-8');
 
         return `Successfully wrote file "${path}".`;

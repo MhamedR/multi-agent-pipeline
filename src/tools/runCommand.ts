@@ -31,11 +31,14 @@ export function createRunCommandTool(workspace: string): Tool {
         const {stdout, stderr} = await execFileAsync('/bin/sh', ['-c', command], {
           cwd: workspace,
           maxBuffer: 1024 * 1024,
+          timeout: 60_000,
         });
 
-        return [stdout ? `STDOUT:\n${stdout}` : '', stderr ? `STDERR:\n${stderr}` : '']
+        const output = [stdout ? `STDOUT:\n${stdout}` : '', stderr ? `STDERR:\n${stderr}` : '']
           .filter(Boolean)
           .join('\n');
+
+        return output.length > 0 ? output : 'Command succeeded with no output.';
       } catch (error) {
         if (typeof error === 'object' && error !== null && 'stdout' in error && 'stderr' in error) {
           const commandError = error as {

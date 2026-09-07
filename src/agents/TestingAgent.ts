@@ -49,16 +49,6 @@ export class TestingAgent {
   }
 
   async test(task: string): Promise<TestReport> {
-    const result = await this.agent.run(task);
-
-    try {
-      return JSON.parse(result) as TestReport;
-    } catch {
-      console.log('RAW TESTING AGENT RESPONSE:');
-
-      console.log(JSON.stringify(result));
-
-      throw new Error('Testing Agent returned invalid JSON.');
-    }
+    return this.agent.runJson<TestReport>(task);
   }
 }

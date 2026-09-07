@@ -9,7 +9,7 @@ export class SearXNGProvider implements SearchProvider {
     url.searchParams.set('q', query);
     url.searchParams.set('format', 'json');
 
-    const response = await fetch(url);
+    const response = await fetch(url, {signal: AbortSignal.timeout(15_000)});
 
     if (!response.ok) {
       throw new Error(`SearXNG search failed: HTTP ${response.status}`);
