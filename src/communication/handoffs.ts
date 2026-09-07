@@ -75,3 +75,48 @@ Inspect the code quality and completeness against the original task.
 Do not modify files.
   `.trim();
 }
+
+export function fixHandoff(context: PipelineContext): string {
+  const test = context.testReport;
+  const review = context.reviewReport;
+  const testFailures = test?.failures.length
+    ? test.failures.map((item) => `- ${item}`).join('\n')
+    : 'None';
+  const reviewIssues = review?.issues.length
+    ? review.issues
+        .map((issue) => `- [${issue.severity}] ${issue.file ?? 'project'}: ${issue.description}`)
+        .join('\n')
+    : 'None';
+
+  return `
+Fix the project so the original task passes tests and review.
+
+This is fix iteration ${context.iteration}.
+
+Task:
+${context.task}
+
+Research summary:
+${context.research?.summary ?? 'No research summary was provided.'}
+
+Previous implementation notes:
+${context.codeOutput ?? 'None'}
+
+Latest test report:
+- passed: ${test?.passed ?? 'unknown'}
+- summary: ${test?.summary ?? 'No testing summary was provided.'}
+- failures:
+${testFailures}
+
+Latest review report:
+- passed: ${review?.passed ?? 'not reviewed yet'}
+- summary: ${review?.summary ?? 'No review summary was provided.'}
+- issues:
+${reviewIssues}
+
+Rules:
+- Fix the reported test failures and review errors.
+- Keep changes small and focused.
+- Do not rewrite unrelated files.
+  `.trim();
+}
