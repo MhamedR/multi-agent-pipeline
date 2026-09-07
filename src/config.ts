@@ -1,6 +1,6 @@
 export function getOllamaModel(): string {
   const model = process.env.OLLAMA_MODEL?.trim();
-  return model && model.length > 0 ? model : 'llama3.2:latest';
+  return model && model.length > 0 ? model : 'qwen3:4b';
 }
 
 export function getSearxngUrl(): string {

@@ -3,9 +3,22 @@ import {ToolRegistry} from '../tools/ToolRegistry.js';
 import type {ResearchReport} from '../types/ResearchReport.js';
 
 export class ResearchAgent {
+  // The underlying generic Agent handles communication with the language
+  // model and execution of any tools provided by the ToolRegistry.
   private readonly agent: Agent;
 
+  /**
+   * Creates a research-focused agent.
+   *
+   * The ResearchAgent does not define or execute research tools itself.
+   * Instead, it receives a ToolRegistry containing the tools it is allowed
+   * to use and passes that registry to the generic Agent.
+   */
   constructor(toolRegistry: ToolRegistry) {
+    // Configure the generic Agent with a research-specific name and role.
+    //
+    // The role acts as the system prompt and defines how the model should
+    // perform research and how the final result must be formatted.
     this.agent = new Agent(
       'Research Agent',
       `
@@ -48,6 +61,15 @@ export class ResearchAgent {
     );
   }
 
+  /**
+   * Researches a technical topic and returns a structured research report.
+   *
+   * runJson() is used instead of run() because the research agent is expected
+   * to return data matching the ResearchReport TypeScript type.
+   *
+   * The generic Agent is also responsible for retrying the request if the
+   * model returns invalid JSON.
+   */
   async research(topic: string): Promise<ResearchReport> {
     return this.agent.runJson<ResearchReport>(`Research this topic thoroughly: ${topic}`);
   }
