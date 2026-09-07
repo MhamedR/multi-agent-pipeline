@@ -6,6 +6,9 @@ import {ReviewerAgent} from '../agents/ReviewerAgent.js';
 import {ToolRegistry} from '../tools/ToolRegistry.js';
 import {createWebSearchTool} from '../tools/webSearch.js';
 import {SearXNGProvider} from '../search/SearXNGProvider.js';
+import {PipelineContext} from '../communication/PipelineContext.js';
+import {codingHandoff, reviewHandoff, testingHandoff} from '../communication/handoffs.js';
+import type {AgentMessage} from '../communication/messages.js';
 import type {ResearchReport} from '../types/ResearchReport.js';
 import type {TestReport} from '../types/TestReport.js';
 import type {ReviewReport} from '../types/ReviewReport.js';
@@ -16,6 +19,7 @@ export type OrchestratorResult = {
   code: string;
   test: TestReport;
   review: ReviewReport;
+  messages: AgentMessage[];
 };
 
 export class Orchestrator {
@@ -38,44 +42,49 @@ export class Orchestrator {
   async run(task: string): Promise<OrchestratorResult> {
     await mkdir(this.workspace, {recursive: true});
 
-    console.log('[Orchestrator] Starting research');
-    const research = await this.researchAgent.research(task);
+    const context = new PipelineContext(task);
 
-    console.log('[Orchestrator] Starting implementation');
-    const code = await this.codingAgent.code(
-      `
-      Implement this task in the project workspace.
+    context.send('orchestrator', 'research', 'Assigned research task', task);
+    context.research = await this.researchAgent.research(task);
+    context.send('research', 'orchestrator', 'Completed research report', context.research.summary);
 
-      Task:
-      ${task}
+    const codingPrompt = codingHandoff(context);
+    context.send('orchestrator', 'coding', 'Assigned implementation with research', codingPrompt);
+    context.codeOutput = await this.codingAgent.code(codingPrompt);
+    context.send('coding', 'orchestrator', 'Completed implementation', context.codeOutput);
 
-      Research summary:
-      ${research.summary}
-      `.trim(),
+    const testingPrompt = testingHandoff(context);
+    context.send(
+      'orchestrator',
+      'testing',
+      'Assigned verification with implementation notes',
+      testingPrompt,
+    );
+    context.testReport = await this.testingAgent.test(testingPrompt);
+    context.send(
+      'testing',
+      'orchestrator',
+      context.testReport.passed ? 'Tests passed' : 'Tests failed',
+      context.testReport.summary,
     );
 
-    console.log('[Orchestrator] Starting tests');
-    const test = await this.testingAgent.test(
-      `
-      Verify that this task was implemented correctly in the project workspace.
-
-      Task:
-      ${task}
-      `.trim(),
+    const reviewPrompt = reviewHandoff(context);
+    context.send('orchestrator', 'reviewer', 'Assigned review with test results', reviewPrompt);
+    context.reviewReport = await this.reviewerAgent.review(reviewPrompt);
+    context.send(
+      'reviewer',
+      'orchestrator',
+      context.reviewReport.passed ? 'Review passed' : 'Review failed',
+      context.reviewReport.summary,
     );
 
-    console.log('[Orchestrator] Starting review');
-    const review = await this.reviewerAgent.review(
-      `
-      Review whether this task was implemented correctly in the project workspace.
-
-      Task:
-      ${task}
-      `.trim(),
-    );
-
-    console.log('[Orchestrator] Pipeline finished');
-
-    return {task, research, code, test, review};
+    return {
+      task,
+      research: context.research,
+      code: context.codeOutput,
+      test: context.testReport,
+      review: context.reviewReport,
+      messages: context.messages,
+    };
   }
 }
